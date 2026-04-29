@@ -32,7 +32,7 @@ entity weight_matrix is
         NEURON_COUNT: natural := 2
     );
     port(
-        clk, matrix_enable: in std_logic;
+        rst, clk, matrix_enable: in std_logic;
         address: in std_logic_vector((NEURON_COUNT - 1) downto 0);
         data_output: out std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0)
     );
@@ -50,11 +50,12 @@ architecture weight_matrix_arch of weight_matrix is
 begin
     process (clk) is
         begin
+            data_output <= (others => '0'); 
             if rising_edge(clk) then
                 if matrix_enable = '1' then
                     for i in 0 to NEURON_COUNT - 1 loop
                         if address(i) = '1' then
-                            data_output(i*DATA_LENGTH-1 downto i) <= weights(i);
+                            data_output <= weights(i+1);
                         end if;
                     end loop;
                 end if;
