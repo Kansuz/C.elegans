@@ -55,7 +55,7 @@ begin
                 if matrix_enable = '1' then
                     for i in 0 to NEURON_COUNT - 1 loop
                         if address(i) = '1' then
-                            data_output <= weights(i+1);
+                            data_output <= weights(i);
                         end if;
                     end loop;
                 end if;
