@@ -18,9 +18,11 @@
 -- 
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.numeric_std.all;
+use IEEE.fixed_pkg.all;
+use ieee.math_real.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -43,21 +45,23 @@ architecture weight_matrix_tb_arch of weight_matrix_tb is
 
 component weight_matrix is
     port(
+        rst: in std_logic;
         clk: in std_logic;
-        matrix_enable: in std_logic_vector;
+        matrix_enable: in std_logic;
         address: in std_logic_vector((NEURON_COUNT- 1) downto 0);
         data_output: out std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0)
     );
 end component;
 
-signal clk, matrix_enable: std_logic;
-signal address: std_logic_vector(((NEURON_COUNT *ADDRESS_LENGTH) - 1) downto 0);
+signal rst, clk, matrix_enable: std_logic;
+signal address: std_logic_vector((NEURON_COUNT - 1) downto 0);
 signal data_output: std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0);
 
 constant clk_period: time:= 50 ns;
 
 begin
-    uut: top_neuron port map(
+    uut: weight_matrix port map(
+    rst => rst,
     clk => clk,
     matrix_enable => matrix_enable,
     address => address,
@@ -74,10 +78,12 @@ begin
     sim_proc: process
         begin
             rst <= '1';
+            matrix_enable <= '0';
             wait for clk_period;
             
             rst <= '0';
-            address <= '0110';
+            matrix_enable <= '1';
+            address <= "01";
             wait for 50 ns;
     
     end process; 
