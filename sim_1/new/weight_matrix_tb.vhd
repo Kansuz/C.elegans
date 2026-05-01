@@ -84,7 +84,12 @@ begin
             rst <= '0';
             matrix_enable <= '1';
             address <= "01";
-            wait for 50 ns;
+            wait for 50 ns; --wynik 011 010
+            
+            rst <= '0';
+            matrix_enable <= '1';
+            address <= "01";
+            wait for 50 ns; --wynik 110 100
     
     end process; 
 end weight_matrix_tb_arch;
