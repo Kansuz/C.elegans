@@ -39,25 +39,42 @@ entity weight_matrix is
 end weight_matrix;
 
 architecture weight_matrix_arch of weight_matrix is
+
     subtype row_type is std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0);
     type matrix_type is array (0 to NEURON_COUNT - 1) of row_type;
 
     constant weights : matrix_type := (
-        0 => "011" & "101", 
+        0 => "011" & "010", 
         1 => "111" & "001"  
     );
     
 begin
     process (clk) is
+        variable v_sum : std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0);
+        variable low, high : natural;
         begin
-            data_output <= (others => '0'); 
             if rising_edge(clk) then
-                if matrix_enable = '1' then
+                if rst = '1' then 
+                    data_output <= (others => '0'); 
+                    v_sum := (others => '0'); 
+                
+                elsif matrix_enable = '1' then
                     for i in 0 to NEURON_COUNT - 1 loop
                         if address(i) = '1' then
-                            data_output <= weights(i);
+                            for seg in 0 to NEURON_COUNT - 1 loop
+                                low  := seg * DATA_LENGTH;
+                                high := (seg + 1) * DATA_LENGTH - 1;
+                        
+                                v_sum(high downto low) := 
+                                    std_logic_vector(unsigned(v_sum(high downto low)) + unsigned(weights(i)(high downto low)));
+                                             
+--                            v_sum(DATA_LENGTH*(seg+1)-1 downto DATA_LENGTH*i):= 
+--                               std_logic_vector(unsigned(v_sum(DATA_LENGTH*(seg+1)-1 downto DATA_LENGTH*seg)) + unsigned(weights(i)(DATA_LENGTH*(seg+1)-1 downto DATA_LENGTH*seg)));
+--                            data_output <= weights(i);
+                            end loop;
                         end if;
                     end loop;
+                    data_output <= v_sum;
                 end if;
             end if;
     end process; 
