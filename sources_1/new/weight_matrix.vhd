@@ -67,9 +67,6 @@ begin
                         
                                 v_sum(high downto low) := 
                                     std_logic_vector(unsigned(v_sum(high downto low)) + unsigned(weights(i)(high downto low)));
-                                             
---                            v_sum(DATA_LENGTH*(seg+1)-1 downto DATA_LENGTH*i):= 
---                               std_logic_vector(unsigned(v_sum(DATA_LENGTH*(seg+1)-1 downto DATA_LENGTH*seg)) + unsigned(weights(i)(DATA_LENGTH*(seg+1)-1 downto DATA_LENGTH*seg)));
 --                            data_output <= weights(i);
                             end loop;
                         end if;
