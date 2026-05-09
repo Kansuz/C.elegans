@@ -59,6 +59,7 @@ begin
                     v_sum := (others => '0'); 
                 
                 elsif matrix_enable = '1' then
+                    v_sum := (others => '0'); 
                     for i in 0 to NEURON_COUNT - 1 loop
                         if address(i) = '1' then
                             for seg in 0 to NEURON_COUNT - 1 loop
