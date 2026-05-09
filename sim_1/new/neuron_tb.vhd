@@ -36,7 +36,6 @@ use IEEE.STD_LOGIC_TEXTIO.ALL;
 
 entity neuron_tb is
 generic(
-       NEURON_ID : integer := 4;
        VECTOR_WIDTH_DOWN : integer := -8;
        VECTOR_WIDTH_UP : integer := 7;
        THRESHOLD_VALUE : real:=-55.0; --(-55mV)
@@ -54,10 +53,12 @@ component top_neuron is
 --        MEMBRANCE_POTENTIAL_WIDTH : integer := 8
 --    );
     port (
+        neuron_id: in std_logic_vector(8 downto 0);
         clk: in std_logic;
         rst: in std_logic;
         input_neurons: in sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
         spike: out std_logic;
+        neuron_address: out std_logic_vector(8 downto 0);
         
         membrane_potential_monitor: out sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
         leak_monitor: out sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
@@ -67,20 +68,25 @@ end component;
 
 signal clk, rst, spike: std_logic;
 signal input_neurons: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
+signal neuron_address: std_logic_vector(8 downto 0);
+
 
 signal membrane_value:  sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
 signal leak_monitor_value:  sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
 signal threshold_monitor_value:  sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
+signal neuron_id: std_logic_vector(8 downto 0);
 
 constant clk_period: time:= 50 ns;
 
 begin
 
     uut: top_neuron port map(
+    neuron_id => neuron_id,
     clk => clk,
     rst => rst,
     input_neurons => input_neurons,
     spike => spike,
+    neuron_address => neuron_address,
     membrane_potential_monitor => membrane_value,
     leak_monitor => leak_monitor_value,
     threshold_monitor => threshold_monitor_value);
@@ -96,6 +102,7 @@ begin
     sim_proc: process
         begin
             rst <= '1';
+            neuron_id <= "000000001";
             wait for clk_period;
             
             while now < 1 ms loop
@@ -164,11 +171,11 @@ begin
                 wait until rising_edge(clk); 
                 write(write_line, spike);
                 write (write_line, string'(":"));
-                write (write_line, to_real(membrane_value));
+                write (write_line, to_integer(membrane_value));
                 write (write_line, string'(" threshold:"));
-                write (write_line, to_real(threshold_monitor_value));
+                write (write_line, to_integer(threshold_monitor_value));
                 write (write_line, string'(" leak:"));
-                write (write_line, to_real(leak_monitor_value));
+                write (write_line, to_integer(leak_monitor_value));
                 writeline(output_file, write_line);
             end loop;
          wait;
