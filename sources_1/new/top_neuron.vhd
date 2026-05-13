@@ -5,7 +5,7 @@
 -- Create Date: 12.11.2025 21:12:57
 -- Design Name: 
 -- Module Name: top_neuron - top_neuron_arch
--- Project Name: Magisterka
+-- Project Name: Master Thesis
 -- Target Devices: NexysDDR4
 -- Tool Versions: 
 -- Description: Implementation of a single spiking neuron.
@@ -25,19 +25,26 @@ use ieee.math_real.all;
 
 entity top_neuron is
     generic(
-        VECTOR_WIDTH_DOWN : integer := -8;
-        VECTOR_WIDTH_UP : integer := 7;
-        THRESHOLD_VALUE : real:=-55.0; --(-55mV)
-        MEMBRANE_POTENCJAL_VALUE: real:=-70.0; --(-70mV)
-        LEAKAGE: real:=5.0
+       --sfixed size
+       VECTOR_WIDTH_DOWN : integer := -8;
+       VECTOR_WIDTH_UP : integer := 7;
+       --neuron information
+       ADDRESS_WIDTH: integer := 8;
+       THRESHOLD_VALUE : real := -30.0; 
+       MEMBRANE_POTENCJAL_VALUE: real := -50.0;
+       LEAKAGE: real := 5.0;
+       --prevents neuron from too high or too low values
+       MEMBRANE_MAX_VALUE: real := 40.0;
+       MEMBRANE_MIN_VALUE: real := -90.0;
+       THRESHOLD_MAX_VALUE: real := 0.0
     );
     port (
-        neuron_id: in std_logic_vector(8 downto 0);
+        neuron_id: in std_logic_vector(ADDRESS_WIDTH downto 0);
         clk: in std_logic;
         rst: in std_logic;
         input_neurons: in sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
         spike: out std_logic;
-        neuron_address: out std_logic_vector(8 downto 0);
+        neuron_address: out std_logic_vector(ADDRESS_WIDTH downto 0);
         
         membrane_potential_monitor: out sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
         leak_monitor: out sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
@@ -51,66 +58,66 @@ architecture top_neuron_arch of top_neuron is
     signal threshold: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
     signal membrane_potential: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
     signal membrane_potential_init: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN):= to_sfixed(MEMBRANE_POTENCJAL_VALUE,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
-    signal leakage_signal: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN):= to_sfixed(LEAKAGE, VECTOR_WIDTH_UP, VECTOR_WIDTH_DOWN);
-    signal current_leak: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
-
+    signal leak_init: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN):= to_sfixed(LEAKAGE, VECTOR_WIDTH_UP, VECTOR_WIDTH_DOWN);
+    signal current_leak_signal : sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
+--    signal current_leak: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
     
+    constant MEMBRANE_MAX : sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN) := to_sfixed(MEMBRANE_MAX_VALUE, VECTOR_WIDTH_UP, VECTOR_WIDTH_DOWN);
+    constant MEMBRANE_MIN : sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN) := to_sfixed(MEMBRANE_MIN_VALUE, VECTOR_WIDTH_UP, VECTOR_WIDTH_DOWN);
+    constant THRESHOLD_MAX : sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN) := to_sfixed(THRESHOLD_MAX_VALUE, VECTOR_WIDTH_UP, VECTOR_WIDTH_DOWN);
+
 begin
 
     membrane_potential_monitor <= membrane_potential;
-    leak_monitor <= current_leak;
+    leak_monitor <= current_leak_signal;
     threshold_monitor <= threshold;
     spike <= spike_signal;
     
     process(rst, clk)
         variable membrane_copy: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
         variable threshold_copy: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
-        variable leak_init: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
---        variable current_leak: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
+        variable current_leak: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
 
---        variable leak_copy: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
 
     begin
---          membrane_potential_monitor <= membrane_potential;
---          leak_monitor <= current_leak;
---          threshold_monitor <= threshold;
---          spike <= spike_signal;
-          
-	      if clk'event and clk = '1' then
+	      if rising_edge(clk) then
 	      
 		      if rst = '1' then
 		        spike_signal <= '0';
 			    membrane_potential <= membrane_potential_init;
 			    threshold <= threshold_init;
-			    leak_init := leakage_signal;
---			    leak_init := resize(shift_right(membrane_potential_init, 4), leak_init);
-			    current_leak <= leak_init;
+			    current_leak := leak_init;
+			    neuron_address <= (others => '0');
 			    
 			  else 
-                 
                  if spike_signal = '1' then
                     spike_signal <= '0';
                     membrane_potential <= membrane_potential_init;
-                    threshold <= resize(threshold - shift_right(threshold, 3), threshold);  
-                    current_leak <= leak_init; 
                     neuron_address <= (others => '0');
+                    threshold <= resize(threshold - shift_right(threshold, 3), threshold);
+                    if threshold > THRESHOLD_MAX then
+                        threshold <= THRESHOLD_MAX;
+                    end if;
+--                    current_leak := leak_init; 
                  else 
---                     current_leak := resize((current_leak - shift_right(current_leak, 3)), current_leak); 
-                                         
                      membrane_copy := resize(membrane_potential + input_neurons, membrane_potential);
+                     if membrane_copy > MEMBRANE_MAX then
+                        membrane_copy := MEMBRANE_MAX;
+                     elsif membrane_copy < MEMBRANE_MIN then
+                        membrane_copy := MEMBRANE_MIN;
+                     end if;
                      
-                     current_leak <= resize(shift_right(membrane_potential - membrane_potential_init, 4), current_leak);
-                     
+                     current_leak := resize(shift_right(membrane_potential - membrane_potential_init, 4), current_leak);
+
                      if membrane_copy >= threshold then
                          spike_signal <= '1';
---                         membrane_potential <= resize(membrane_copy + leak_init, membrane_potential);
                          membrane_potential <= membrane_copy;
---                         neuron_address <= std_logic_vector(to_unsigned((NEURON_ID), neuron_address'length));
-                           neuron_address <= neuron_id;
+                         neuron_address <= neuron_id;
 
                      else
                         spike_signal <= '0';
                         membrane_potential <= resize(membrane_copy - current_leak, membrane_potential);
+                        neuron_address <= (others => '0');
                             if threshold > threshold_init then
                                 threshold_copy :=  resize(threshold + shift_right(threshold, 5), threshold);
                                     if threshold_copy < threshold_init then
@@ -123,6 +130,7 @@ begin
                  end if;
 		      end if;
 	      end if;
+	      current_leak_signal <= current_leak;
     end process;
 
 end top_neuron_arch;

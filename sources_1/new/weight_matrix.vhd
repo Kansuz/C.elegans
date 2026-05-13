@@ -17,8 +17,6 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
@@ -27,9 +25,8 @@ use ieee.math_real.all;
 
 entity weight_matrix is
     generic(
-        ADDRESS_LENGTH: natural := 2;
-        DATA_LENGTH: natural := 3;
-        NEURON_COUNT: natural := 2
+        DATA_LENGTH: integer := 3;
+        NEURON_COUNT: integer := 2
     );
     port(
         rst, clk, matrix_enable: in std_logic;
@@ -44,14 +41,14 @@ architecture weight_matrix_arch of weight_matrix is
     type matrix_type is array (0 to NEURON_COUNT - 1) of row_type;
 
     constant weights : matrix_type := (
-        0 => "011" & "010", 
+        0 => "011" & "111", 
         1 => "111" & "001"  
     );
     
 begin
     process (clk) is
         variable v_sum : std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0);
-        variable low, high : natural;
+        variable low, high : integer;
         begin
             if rising_edge(clk) then
                 if rst = '1' then 
