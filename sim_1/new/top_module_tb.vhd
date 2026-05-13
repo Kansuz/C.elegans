@@ -38,14 +38,20 @@ use STD.TEXTIO.ALL;
 
 entity top_module_tb is
     generic(
-        NEURON_ID : integer := 1;
-        VECTOR_WIDTH_DOWN : integer := -8;
-        VECTOR_WIDTH_UP : integer := 7;
-        THRESHOLD_VALUE : real:=-55.0; --(-55mV)
-        MEMBRANE_POTENCJAL_VALUE: real:=-70.0; --(-70mV)
-        LEAKAGE: real:=5.0;
+       --sfixed size
+       VECTOR_WIDTH_DOWN : integer := -8;
+       VECTOR_WIDTH_UP : integer := 7;
+       --neuron information
+       ADDRESS_WIDTH: integer := 8;
+       THRESHOLD_VALUE : real := -30.0; 
+       MEMBRANE_POTENCJAL_VALUE: real := -50.0;
+       LEAKAGE: real := 5.0;
+       --prevents neuron from too high or too low values
+       MEMBRANE_MAX_VALUE: real := 40.0;
+       MEMBRANE_MIN_VALUE: real := -90.0;
+       THRESHOLD_MAX_VALUE: real := 0.0;
         
-        NEURON_COUNT: natural := 2;
+        NEURON_COUNT : natural := 2;
         DATA_LENGTH: natural := 3
     );
 end top_module_tb;
@@ -57,7 +63,7 @@ architecture top_module_tb_arch of top_module_tb is
             rst: in std_logic;
             external_input: in sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
             
-            spike_monitor: out std_logic;
+            spike_monitor: out std_logic_vector(NEURON_COUNT-1 downto 0);
             data_output_monitor: out std_logic_vector(((NEURON_COUNT * DATA_LENGTH) - 1) downto 0);
             membrane_potential_monitor: out sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
             leak_monitor: out sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
@@ -69,7 +75,8 @@ architecture top_module_tb_arch of top_module_tb is
         );
     end component;
     
-signal clk, rst, spike_monitor: std_logic;
+signal clk, rst: std_logic;
+signal spike_monitor: std_logic_vector(NEURON_COUNT-1 downto 0);
 signal external_input: sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
 
 
@@ -109,20 +116,56 @@ begin
         
         while now < 1 ms loop
         
+--        rst <= '0';
+--        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 50 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(5.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(3.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(8.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 50 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(15.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+        
+--        rst <= '0';
+--        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+--        wait for 100 ns;
+
         rst <= '0';
-        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+        external_input <= to_sfixed(10.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
         wait for 50 ns;
         
         rst <= '0';
-        external_input <= to_sfixed(5.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+        external_input <= to_sfixed(10.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
         wait for 100 ns;
         
         rst <= '0';
-        external_input <= to_sfixed(0.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+        external_input <= to_sfixed(10.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
         wait for 100 ns;
         
         rst <= '0';
-        external_input <= to_sfixed(3.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
+        external_input <= to_sfixed(10.0,VECTOR_WIDTH_UP,VECTOR_WIDTH_DOWN);
         wait for 100 ns;
         
         rst <= '0';

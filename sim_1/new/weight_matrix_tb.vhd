@@ -35,9 +35,8 @@ use ieee.math_real.all;
 
 entity weight_matrix_tb is
     generic (
-        ADDRESS_LENGTH: natural := 2;
-        DATA_LENGTH: natural := 3;
-        NEURON_COUNT: natural := 2
+        DATA_LENGTH: integer := 3;
+        NEURON_COUNT: integer := 2
     );
 end weight_matrix_tb;
 

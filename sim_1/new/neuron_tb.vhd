@@ -38,20 +38,18 @@ entity neuron_tb is
 generic(
        VECTOR_WIDTH_DOWN : integer := -8;
        VECTOR_WIDTH_UP : integer := 7;
-       THRESHOLD_VALUE : real:=-55.0; --(-55mV)
-       MEMBRANE_POTENCJAL_VALUE: real:=-70.0; --(-70mV)
-       LEAKAGE: real:=-10.0
-
+       ADDRESS_WIDTH: integer := 8;
+       THRESHOLD_VALUE : real := -30.0; 
+       MEMBRANE_POTENCJAL_VALUE: real := -50.0;
+       LEAK: real := 5.0;
+       MEMBRANE_MAX_VALUE: real := 40.0;
+       MEMBRANE_MIN_VALUE: real := -90.0;
+       THRESHOLD_MAX_VALUE: real := 0.0
     );
 end neuron_tb;
 
 architecture neuron_tb_arch of neuron_tb is
 component top_neuron is
---    generic(
---        NEURON_ID : integer := 4;
---        THRESHOLD_WIDTH : integer := 8;
---        MEMBRANCE_POTENTIAL_WIDTH : integer := 8
---    );
     port (
         neuron_id: in std_logic_vector(8 downto 0);
         clk: in std_logic;
@@ -171,11 +169,11 @@ begin
                 wait until rising_edge(clk); 
                 write(write_line, spike);
                 write (write_line, string'(":"));
-                write (write_line, to_integer(membrane_value));
+                write (write_line, to_real(membrane_value));
                 write (write_line, string'(" threshold:"));
-                write (write_line, to_integer(threshold_monitor_value));
+                write (write_line, to_real(threshold_monitor_value));
                 write (write_line, string'(" leak:"));
-                write (write_line, to_integer(leak_monitor_value));
+                write (write_line, to_real(leak_monitor_value));
                 writeline(output_file, write_line);
             end loop;
          wait;
