@@ -24,32 +24,13 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.fixed_pkg.all;
 use STD.TEXTIO.ALL;
 use IEEE.STD_LOGIC_TEXTIO.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use work.values_pkg.all;
 
 entity neuron_tb is
-generic(
-       VECTOR_WIDTH_DOWN : integer := -8;
-       VECTOR_WIDTH_UP : integer := 7;
-       ADDRESS_WIDTH: integer := 8;
-       THRESHOLD_VALUE : real := -30.0; 
-       MEMBRANE_POTENCJAL_VALUE: real := -50.0;
-       LEAK: real := 5.0;
-       MEMBRANE_MAX_VALUE: real := 40.0;
-       MEMBRANE_MIN_VALUE: real := -90.0;
-       THRESHOLD_MAX_VALUE: real := 0.0
-    );
 end neuron_tb;
 
 architecture neuron_tb_arch of neuron_tb is
-component top_neuron is
+component neuron is
     port (
         neuron_id: in std_logic_vector(8 downto 0);
         clk: in std_logic;
@@ -78,7 +59,7 @@ constant clk_period: time:= 50 ns;
 
 begin
 
-    uut: top_neuron port map(
+    uut: neuron port map(
     neuron_id => neuron_id,
     clk => clk,
     rst => rst,
