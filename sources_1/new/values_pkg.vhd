@@ -23,10 +23,12 @@ use IEEE.fixed_pkg.all;
 
 package values_pkg is
     --number of neurons
-    constant NEURON_COUNT : integer := 2;
+    constant NEURON_COUNT : integer := 4;
+    constant SENSOR_COUNT : integer := 1;
     --up and down value for sfixed values
     constant VECTOR_WIDTH_DOWN : integer := -8;
     constant VECTOR_WIDTH_UP : integer := 7;
+    constant SFIXED_WIDTH : integer := 16;
     --lenght of neuron value
     constant ADDRESS_WIDTH : integer := 8;
     --value of initial threshold 
@@ -40,8 +42,8 @@ package values_pkg is
     constant MEMBRANE_MIN_VALUE : real := -90.0;
     constant THRESHOLD_MAX_VALUE : real := 0.0;
     --width of weight values
-    constant WEIGHT_WIDTH : integer := 3;
+    constant WEIGHT_WIDTH : integer := 8;
     --width of memory row = number of neurons * width of weight value
-    constant MEMORY_ROW_WIDTH : integer := NEURON_COUNT * WEIGHT_WIDTH;
+    constant MEMORY_ROW_WIDTH : integer := (NEURON_COUNT * WEIGHT_WIDTH) + (SENSOR_COUNT * WEIGHT_WIDTH);
     
 end package;

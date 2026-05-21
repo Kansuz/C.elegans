@@ -11,6 +11,7 @@
 -- Description: Implementation of a single spiking neuron.
 -- 
 -- Dependencies: 
+-- Dependencies: 
 -- 
 -- Revision:
 -- Revision 0.01 - File Created
@@ -30,6 +31,8 @@ entity neuron is
         clk: in std_logic;
         rst: in std_logic;
         input_neurons: in sfixed(VECTOR_WIDTH_UP downto VECTOR_WIDTH_DOWN);
+        bus_done: in std_logic;
+        weight_valid: in std_logic;
         spike: out std_logic;
         neuron_address: out std_logic_vector(ADDRESS_WIDTH downto 0);
         
@@ -86,38 +89,47 @@ begin
                         threshold <= THRESHOLD_MAX;
                     end if;
 --                    current_leak := leak_init; 
-                 else 
-                     membrane_copy := resize(membrane_potential + input_neurons, membrane_potential);
-                     if membrane_copy > MEMBRANE_MAX then
+                 else
+                    membrane_copy := membrane_potential;
+                    if weight_valid = '1' then
+                        membrane_copy := resize(membrane_potential + input_neurons, membrane_potential);
+                    end if;
+                    if membrane_copy > MEMBRANE_MAX then
                         membrane_copy := MEMBRANE_MAX;
-                     elsif membrane_copy < MEMBRANE_MIN then
+                    elsif membrane_copy < MEMBRANE_MIN then
                         membrane_copy := MEMBRANE_MIN;
-                     end if;
+                    end if;
                      
-                     current_leak := resize(shift_right(membrane_potential - membrane_potential_init, 4), current_leak);
+                    current_leak := resize(shift_right(membrane_potential - membrane_potential_init, 4), current_leak);
 
-                     if membrane_copy >= threshold then
-                         spike_signal <= '1';
-                         membrane_potential <= membrane_copy;
-                         neuron_address <= neuron_id;
-
-                     else
-                        spike_signal <= '0';
-                        membrane_potential <= resize(membrane_copy - current_leak, membrane_potential);
-                        neuron_address <= (others => '0');
-                            if threshold > threshold_init then
-                                threshold_copy :=  resize(threshold + shift_right(threshold, 5), threshold);
-                                    if threshold_copy < threshold_init then
-                                        threshold <= threshold_init;
-                                    else
-                                        threshold <= threshold_copy;
-                                    end if;
-                            end if;
-                     end if;
+                    if bus_done = '1' then
+                         if membrane_copy >= threshold then
+                             spike_signal <= '1';
+                             membrane_potential <= membrane_copy;
+                             neuron_address <= neuron_id; --pomyslec czy potrzebuje
+    
+                         else
+                            spike_signal <= '0';
+                            membrane_potential <= resize(membrane_copy - current_leak, membrane_potential);
+                            neuron_address <= (others => '0'); --pomyslec czy potrzebuje
+                                if threshold > threshold_init then
+                                    threshold_copy :=  resize(threshold + shift_right(threshold, 5), threshold);
+                                        if threshold_copy < threshold_init then
+                                            threshold <= threshold_init;
+                                        else
+                                            threshold <= threshold_copy;
+                                        end if;
+                                end if;
+                         end if;
+                    else
+                        membrane_potential <= membrane_copy;
+                        spike_signal       <= '0';
+                        neuron_address     <= (others => '0'); --pomyslec czy potrzebuje
+                    end if;
                  end if;
 		      end if;
+		      current_leak_signal <= current_leak;
 	      end if;
-	      current_leak_signal <= current_leak;
     end process;
 
 end neuron_arch;
