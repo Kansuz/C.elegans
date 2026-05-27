@@ -100,7 +100,7 @@ begin
                         membrane_copy := MEMBRANE_MIN;
                     end if;
                      
-                    current_leak := resize(shift_right(membrane_potential - membrane_potential_init, 4), current_leak);
+                    current_leak := resize(shift_right(membrane_potential - membrane_potential_init, 5), current_leak);
 
                     if bus_done = '1' then
                          if membrane_copy >= threshold then
