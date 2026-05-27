@@ -32,7 +32,7 @@ class NeuronRef:
             elif membrane_copy < self.v_min:
                 membrane_copy = self.v_min
             
-            current_leak = (self.v - self.v_init) / 16.0
+            current_leak = (self.v - self.v_init) / 32.0
 
             if bus_done:
                 if membrane_copy >= self.threshold:
